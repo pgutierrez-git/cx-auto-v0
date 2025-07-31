@@ -16,6 +16,7 @@ import {
   Star,
   X,
   Settings,
+  LogOut,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -26,6 +27,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, Line, LineChart, XAxis, YAxis } from "recharts"
+import { MagicLinkAuth } from "@/components/auth/magic-link-auth"
+import { useAuth } from "@/hooks/use-auth"
+import { ProtectedRoute } from "@/components/auth/protected-route"
 
 // Datos de ejemplo para los gráficos
 const transactionsData = [
@@ -93,106 +97,9 @@ const cohortData = {
   ],
 }
 
-// Componente de Login
-const LoginForm = ({ onLogin }: { onLogin: (email: string) => void }) => {
-  const [email, setEmail] = useState("")
-  const [code, setCode] = useState("")
-  const [step, setStep] = useState<"email" | "code">("email")
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleSendCode = async () => {
-    if (!email) return
-    setIsLoading(true)
-    // Simular envío de código
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setIsLoading(false)
-    setStep("code")
-  }
-
-  const handleVerifyCode = async () => {
-    if (!code) return
-    setIsLoading(true)
-    // Simular verificación
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    onLogin(email)
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">Nu</span>
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Nu Analytics Dashboard</CardTitle>
-          <CardDescription className="text-gray-600">
-            {step === "email" ? "Ingresa tu correo para acceder" : "Verifica tu identidad"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {step === "email" ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="tu@empresa.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleSendCode}
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                disabled={!email || isLoading}
-              >
-                {isLoading ? "Enviando código..." : "Enviar código de verificación"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                <p className="text-sm text-green-700">
-                  Hemos enviado un código de verificación a <strong>{email}</strong>
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="code">Código de verificación</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="code"
-                    type="text"
-                    placeholder="123456"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="pl-10 text-center text-lg tracking-widest"
-                    maxLength={6}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleVerifyCode}
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                disabled={!code || isLoading}
-              >
-                {isLoading ? "Verificando..." : "Verificar código"}
-              </Button>
-              <Button variant="ghost" onClick={() => setStep("email")} className="w-full">
-                Cambiar correo electrónico
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  )
+// Componente de Login con Magic Link
+const LoginForm = () => {
+  return <MagicLinkAuth />
 }
 
 // Componente de Widget Flotante de Feedback
@@ -639,20 +546,8 @@ const CohortTable = ({ data }: { data: any[] }) => {
 }
 
 export default function NuTransactionalPortal() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userEmail, setUserEmail] = useState("")
+  const { user, loading, signOut, isAuthenticated } = useAuth()
   const [activeTab, setActiveTab] = useState("servicios")
-  // Eliminar const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
-
-  const handleLogin = (email: string) => {
-    setUserEmail(email)
-    setIsAuthenticated(true)
-  }
-
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setUserEmail("")
-  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("es-PE", {
@@ -668,13 +563,14 @@ export default function NuTransactionalPortal() {
   }
 
   if (!isAuthenticated) {
-    return <LoginForm onLogin={handleLogin} />
+    return <LoginForm />
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
@@ -687,14 +583,15 @@ export default function NuTransactionalPortal() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600">Bienvenido, {userEmail}</span>
+              <span className="text-sm text-gray-600">Bienvenido, {user?.email}</span>
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 Actualizado
               </Badge>
               <Button variant="outline" size="sm">
                 Exportar
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <Button variant="ghost" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
                 Cerrar sesión
               </Button>
               <Button
@@ -1193,8 +1090,9 @@ export default function NuTransactionalPortal() {
         </Tabs>
       </div>
 
-      {/* Feedback Modal */}
-      <FloatingFeedbackWidget />
-    </div>
+        {/* Feedback Modal */}
+        <FloatingFeedbackWidget />
+      </div>
+    </ProtectedRoute>
   )
 }
