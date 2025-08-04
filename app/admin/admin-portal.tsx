@@ -31,6 +31,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, XAxis, YAxis, Bar, BarChart } from "recharts"
+import { TapiLogo } from "@/components/ui/tapi-logo"
 
 // Datos de ejemplo para clientes
 const clientsData = [
@@ -223,7 +224,7 @@ const ClientManagement = () => {
             Filtros
           </Button>
         </div>
-        <Button>
+        <Button className="bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Cliente
         </Button>
@@ -278,14 +279,14 @@ const ClientManagement = () => {
 
               {/* Acciones */}
               <div className="flex space-x-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                <Button variant="outline" size="sm" className="flex-1 bg-transparent border-green-200 text-green-700 hover:bg-green-50">
                   <Eye className="w-4 h-4 mr-2" />
                   Ver Portal
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleEditClient(client)}>
+                <Button variant="outline" size="sm" onClick={() => handleEditClient(client)} className="border-green-200 text-green-700 hover:bg-green-50">
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-green-200 text-green-700 hover:bg-green-50">
                   <Palette className="w-4 h-4" />
                 </Button>
               </div>
@@ -411,10 +412,10 @@ const ClientEditForm = ({ client, onSave, onCancel }: any) => {
       </div>
 
       <div className="flex justify-end space-x-3">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} className="border-green-200 text-green-700 hover:bg-green-50">
           Cancelar
         </Button>
-        <Button type="submit">Guardar Cambios</Button>
+        <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Guardar Cambios</Button>
       </div>
     </form>
   )
@@ -480,7 +481,7 @@ const AnalyticsOverview = () => {
               config={{
                 logins: {
                   label: "Logins",
-                  color: "#8B5CF6",
+                  color: "#10B981",
                 },
               }}
               className="h-[300px]"
@@ -488,14 +489,14 @@ const AnalyticsOverview = () => {
               <AreaChart data={loginTrendsData}>
                 <defs>
                   <linearGradient id="loginGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="month" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="logins" stroke="#8B5CF6" strokeWidth={3} fill="url(#loginGradient)" />
+                <Area type="monotone" dataKey="logins" stroke="#10B981" strokeWidth={3} fill="url(#loginGradient)" />
               </AreaChart>
             </ChartContainer>
           </CardContent>
@@ -511,7 +512,7 @@ const AnalyticsOverview = () => {
               config={{
                 usage: {
                   label: "Uso %",
-                  color: "#10B981",
+                  color: "#059669",
                 },
               }}
               className="h-[300px]"
@@ -520,7 +521,7 @@ const AnalyticsOverview = () => {
                 <XAxis dataKey="client" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="usage" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="usage" fill="#059669" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -765,25 +766,23 @@ export function AdminPortal() {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-green-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-white/95 backdrop-blur-sm border-b border-green-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">Nu</span>
-              </div>
+              <TapiLogo size="sm" variant="dark" />
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">Portal de Administración</h1>
-                <p className="text-sm text-gray-500">Gestión centralizada de portales de clientes</p>
+                <p className="text-sm text-gray-600">Gestión centralizada de portales de clientes</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 Sistema Activo
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-green-200 text-green-700 hover:bg-green-50">
                 <Settings className="w-4 h-4 mr-2" />
                 Configuración
               </Button>
@@ -794,20 +793,20 @@ export function AdminPortal() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white border border-gray-200 p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-4 bg-white/95 backdrop-blur-sm border border-green-200 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="clients" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="clients" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <Building className="w-4 h-4 mr-2" />
               Clientes
             </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="users" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <Users className="w-4 h-4 mr-2" />
               Usuarios
             </TabsTrigger>
-            <TabsTrigger value="feedback" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="feedback" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <MessageSquare className="w-4 h-4 mr-2" />
               Feedback
             </TabsTrigger>
