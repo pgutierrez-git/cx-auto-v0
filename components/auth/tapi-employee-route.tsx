@@ -47,41 +47,15 @@ export function TapiEmployeeRoute({ children }: TapiEmployeeRouteProps) {
   }
 
   // Mostrar información de debug en lugar de redirigir
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isTapiEmployee) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-green-900">
         <div className="w-full max-w-md p-8">
           <Card className="w-full bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
             <CardContent className="py-12">
               <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">No Autenticado</h3>
-                <p className="text-sm text-gray-600">Usuario no está autenticado</p>
                 <Button onClick={() => router.push('/')} className="mt-4">
-                  Ir al Login
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
-  if (!isTapiEmployee) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-green-900">
-        <div className="w-full max-w-md p-8">
-          <Card className="w-full bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-            <CardContent className="py-12">
-              <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Acceso Restringido</h3>
-                <div className="text-sm text-gray-600 space-y-2">
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>Rol:</strong> {userRole}</p>
-                  <p><strong>¿Es empleado Tapi?</strong> {isTapiEmployee ? 'Sí' : 'No'}</p>
-                </div>
-                <Button onClick={() => router.push('/')} className="mt-4">
-                  Volver al Portal Cliente
+                  Ir al Portal
                 </Button>
               </div>
             </CardContent>
