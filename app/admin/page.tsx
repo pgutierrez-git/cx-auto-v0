@@ -1,12 +1,12 @@
 "use client"
 
 import { AdminPortal } from "./admin-portal"
-import { ProtectedRoute } from "@/components/auth/protected-route"
+import { TapiEmployeeRoute } from "@/components/auth/tapi-employee-route"
 
 export default function AdminPage() {
   return (
-    <ProtectedRoute>
+    <TapiEmployeeRoute>
       <AdminPortal />
-    </ProtectedRoute>
+    </TapiEmployeeRoute>
   )
 }

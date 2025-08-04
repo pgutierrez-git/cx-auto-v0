@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
   TrendingUp,
   CreditCard,
@@ -29,6 +30,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Area, AreaChart, Line, LineChart, XAxis, YAxis } from "recharts"
 import { MagicLinkAuth } from "@/components/auth/magic-link-auth"
 import { useAuth } from "@/hooks/use-auth"
+import { useRoles } from "@/hooks/use-roles"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 
 // Datos de ejemplo para los gráficos
@@ -547,7 +549,11 @@ const CohortTable = ({ data }: { data: any[] }) => {
 
 export default function NuTransactionalPortal() {
   const { user, loading, signOut, isAuthenticated } = useAuth()
+  const { isTapiEmployee } = useRoles()
   const [activeTab, setActiveTab] = useState("servicios")
+  const router = useRouter()
+
+
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("es-PE", {
@@ -584,9 +590,14 @@ export default function NuTransactionalPortal() {
             </div>
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-600">Bienvenido, {user?.email}</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 Actualizado
               </Badge>
+              {isTapiEmployee && (
+                <Badge variant="outline" className="bg-green-600 text-white border-green-600">
+                  Empleado Tapi
+                </Badge>
+              )}
               <Button variant="outline" size="sm">
                 Exportar
               </Button>
@@ -594,15 +605,17 @@ export default function NuTransactionalPortal() {
                 <LogOut className="w-4 h-4 mr-2" />
                 Cerrar sesión
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => (window.location.href = "/admin")}
-                className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Admin Portal
-              </Button>
+              {isTapiEmployee && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (window.location.href = "/admin")}
+                  className="bg-green-600 text-white border-green-600 hover:bg-green-700"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Portal Admin
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -631,8 +644,8 @@ export default function NuTransactionalPortal() {
               {/* Evolución de Transacciones */}
               <Card className="bg-white border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Evolución de Transacciones</CardTitle>
-                  <CardDescription className="text-gray-600">Últimos 6 meses</CardDescription>
+                  <CardTitle className="text-gray-900">Evolución de TPN</CardTitle>
+                  <CardDescription className="text-gray-600">Número de transacciones</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -675,7 +688,7 @@ export default function NuTransactionalPortal() {
               <Card className="bg-white border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900">Evolución de TPV</CardTitle>
-                  <CardDescription className="text-gray-600">Total Payment Volume - Últimos 6 meses</CardDescription>
+                  <CardDescription className="text-gray-600">Total Payment Volume</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -853,8 +866,8 @@ export default function NuTransactionalPortal() {
               {/* Evolución de Transacciones */}
               <Card className="bg-white border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Evolución de Transacciones</CardTitle>
-                  <CardDescription className="text-gray-600">Últimos 6 meses</CardDescription>
+                  <CardTitle className="text-gray-900">Evolución de TPN</CardTitle>
+                  <CardDescription className="text-gray-600">Número de transacciones</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -897,7 +910,7 @@ export default function NuTransactionalPortal() {
               <Card className="bg-white border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900">Evolución de TPV</CardTitle>
-                  <CardDescription className="text-gray-600">Total Payment Volume - Últimos 6 meses</CardDescription>
+                  <CardDescription className="text-gray-600">Total Payment Volume</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer

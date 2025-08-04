@@ -32,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, XAxis, YAxis, Bar, BarChart } from "recharts"
 import { TapiLogo } from "@/components/ui/tapi-logo"
+import { useRoles } from "@/hooks/use-roles"
 
 // Datos de ejemplo para clientes
 const clientsData = [
@@ -764,6 +765,7 @@ const FeedbackManagement = () => {
 // Componente principal del portal de administración
 export function AdminPortal() {
   const [activeTab, setActiveTab] = useState("overview")
+  const { userRole, isTapiEmployee } = useRoles()
 
   return (
     <div className="min-h-screen bg-green-900">
@@ -780,8 +782,20 @@ export function AdminPortal() {
             </div>
             <div className="flex items-center space-x-3">
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Sistema Activo
+                {isTapiEmployee ? 'Empleado Tapi' : 'Sistema Activo'}
               </Badge>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                {userRole}
+              </Badge>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                onClick={() => window.location.href = '/'}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Ver Portal Cliente
+              </Button>
               <Button variant="outline" size="sm" className="border-green-200 text-green-700 hover:bg-green-50">
                 <Settings className="w-4 h-4 mr-2" />
                 Configuración
