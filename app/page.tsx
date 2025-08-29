@@ -32,6 +32,7 @@ import { MagicLinkAuth } from "@/components/auth/magic-link-auth"
 import { useAuth } from "@/hooks/use-auth"
 import { useRoles } from "@/hooks/use-roles"
 import { ProtectedRoute } from "@/components/auth/protected-route"
+import { FeedbackWidget } from "@/components/feedback-widget"
 
 // Datos de ejemplo para los gráficos
 const transactionsData = [
@@ -216,36 +217,7 @@ const FloatingFeedbackWidget = () => {
     )
   }
 
-  return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <div
-        className="relative group cursor-pointer"
-        onMouseEnter={() => setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
-        onClick={() => setIsOpen(true)}
-      >
-        {/* Widget expandido en hover */}
-        <div
-          className={`absolute bottom-0 right-0 bg-white rounded-full shadow-lg border border-gray-200 transition-all duration-300 ${
-            isExpanded ? "w-64 h-12 opacity-100" : "w-12 h-12 opacity-0 pointer-events-none"
-          }`}
-        >
-          <div className="flex items-center h-full px-4">
-            <MessageSquare className="w-5 h-5 text-purple-600 mr-3 flex-shrink-0" />
-            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">¿Cómo va tu experiencia?</span>
-          </div>
-        </div>
-
-        {/* Botón principal */}
-        <div className="w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
-          <MessageSquare className="w-5 h-5 text-white" />
-        </div>
-
-        {/* Indicador de pulso */}
-        <div className="absolute inset-0 rounded-full bg-purple-600 animate-ping opacity-20"></div>
-      </div>
-    </div>
-  )
+  return <FeedbackWidget />
 }
 
 // Componente de Feedback Modal

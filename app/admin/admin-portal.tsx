@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Users,
   Settings,
@@ -19,6 +19,7 @@ import {
   Star,
   Mail,
   Activity,
+  CheckCircle,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -33,6 +34,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Area, AreaChart, XAxis, YAxis, Bar, BarChart } from "recharts"
 import { TapiLogo } from "@/components/ui/tapi-logo"
 import { useRoles } from "@/hooks/use-roles"
+import { getFeedback, getFeedbackStats, updateFeedbackStatus } from "@/lib/feedback"
+import { toast } from "sonner"
 
 // Datos de ejemplo para clientes
 const clientsData = [
@@ -643,16 +646,66 @@ const FeedbackManagement = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [ratingFilter, setRatingFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const [feedback, setFeedback] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<any>(null)
 
-  const filteredFeedback = feedbackData.filter((feedback) => {
+  // Cargar feedback real
+  useEffect(() => {
+    const loadFeedback = async () => {
+      setLoading(true)
+      try {
+        const { data, error } = await getFeedback()
+        if (error) {
+          console.error('Error loading feedback:', error)
+          toast.error('Error al cargar feedback')
+        } else {
+          setFeedback(data || [])
+        }
+
+        // Cargar estadísticas
+        const { data: statsData } = await getFeedbackStats()
+        setStats(statsData)
+      } catch (error) {
+        console.error('Error loading feedback:', error)
+        toast.error('Error al cargar feedback')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFeedback()
+  }, [])
+
+  const filteredFeedback = feedback.filter((feedback) => {
     const matchesSearch =
-      feedback.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      feedback.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      feedback.user.toLowerCase().includes(searchTerm.toLowerCase())
+      feedback.comment?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feedback.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feedback.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feedback.user_email?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRating = ratingFilter === "all" || feedback.rating.toString() === ratingFilter
     const matchesCategory = categoryFilter === "all" || feedback.category === categoryFilter
     return matchesSearch && matchesRating && matchesCategory
   })
+
+  const handleUpdateStatus = async (id: string, status: 'pending' | 'reviewed' | 'resolved') => {
+    try {
+      const result = await updateFeedbackStatus(id, status)
+      if (result.success) {
+        toast.success(`Feedback marcado como ${status === 'reviewed' ? 'revisado' : 'resuelto'}`)
+        // Recargar feedback
+        const { data, error } = await getFeedback()
+        if (!error && data) {
+          setFeedback(data)
+        }
+      } else {
+        toast.error(result.error || 'Error al actualizar estado')
+      }
+    } catch (error) {
+      console.error('Error updating feedback status:', error)
+      toast.error('Error al actualizar estado')
+    }
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("es-ES", {
@@ -717,46 +770,95 @@ const FeedbackManagement = () => {
 
       {/* Lista de feedback */}
       <div className="space-y-4">
-        {filteredFeedback.map((feedback) => (
-          <Card key={feedback.id}>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-4 h-4 ${
-                          star <= feedback.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                    <span className={`ml-2 font-semibold ${getRatingColor(feedback.rating)}`}>{feedback.rating}/5</span>
-                  </div>
-                  <Badge variant="outline">{feedback.category}</Badge>
-                </div>
-                <div className="text-sm text-gray-500">{formatDate(feedback.date)}</div>
-              </div>
-
-              <p className="text-gray-700 mb-4">{feedback.comment}</p>
-
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <div className="flex items-center space-x-4">
-                  <span>
-                    <strong>Cliente:</strong> {feedback.client}
-                  </span>
-                  <span>
-                    <strong>Usuario:</strong> {feedback.user}
-                  </span>
-                </div>
-                <Button variant="ghost" size="sm">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Responder
-                </Button>
-              </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-600">Cargando feedback...</span>
+            </div>
+          </div>
+        ) : filteredFeedback.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay feedback</h3>
+              <p className="text-gray-500">Aún no se ha recibido ningún feedback de los usuarios.</p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          filteredFeedback.map((feedback) => (
+            <Card key={feedback.id}>
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= feedback.rating ? "text-yellow-400 fill-current" : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                      <span className={`ml-2 font-semibold ${getRatingColor(feedback.rating)}`}>{feedback.rating}/5</span>
+                    </div>
+                    <Badge variant="outline">{feedback.category}</Badge>
+                    <Badge 
+                      variant={feedback.status === 'pending' ? 'secondary' : feedback.status === 'reviewed' ? 'default' : 'outline'}
+                      className={feedback.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
+                    >
+                      {feedback.status === 'pending' ? 'Pendiente' : feedback.status === 'reviewed' ? 'Revisado' : 'Resuelto'}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-500">{formatDate(feedback.created_at)}</div>
+                </div>
+
+                <p className="text-gray-700 mb-4">{feedback.comment}</p>
+
+                {feedback.admin_response && (
+                  <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                    <p className="text-sm text-blue-800">
+                      <strong>Respuesta:</strong> {feedback.admin_response}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <div className="flex items-center space-x-4">
+                    {feedback.client_name && (
+                      <span>
+                        <strong>Cliente:</strong> {feedback.client_name}
+                      </span>
+                    )}
+                    <span>
+                      <strong>Usuario:</strong> {feedback.user_name || feedback.user_email || 'Anónimo'}
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleUpdateStatus(feedback.id, 'reviewed')}
+                      disabled={feedback.status === 'reviewed'}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Marcar como revisado
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleUpdateStatus(feedback.id, 'resolved')}
+                      disabled={feedback.status === 'resolved'}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Resolver
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   )
